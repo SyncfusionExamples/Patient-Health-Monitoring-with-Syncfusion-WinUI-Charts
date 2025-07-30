@@ -1,4 +1,3 @@
-using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Syncfusion.UI.Xaml.Editors;
 
