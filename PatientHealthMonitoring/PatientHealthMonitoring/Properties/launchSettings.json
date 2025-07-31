@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "PatientHealthMonitoring (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "PatientHealthMonitoring (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
