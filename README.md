@@ -38,6 +38,9 @@ The [Syncfusion WinUI SfCircularChart](https://help.syncfusion.com/winui/circula
 
 By integrating these Syncfusion controls, the dashboard delivers a seamless, data-driven experience—empowering healthcare providers to make informed decisions and monitor patient health effectively.
 
+## Output
+![WinUI_BlogOutput](https://github.com/user-attachments/assets/6dd77362-553c-403c-b078-5f521f16089a)
+
 ## Troubleshooting
 Path too long exception
 
