@@ -33,7 +33,7 @@ namespace PatientHealthMonitoring
             }
         }
 
-        private ObservableCollection<MedicationAdherence> medication;
+        private ObservableCollection<MedicationAdherence> medication = new();
         public ObservableCollection<MedicationAdherence> Medications
         {
             get => medication;
@@ -44,7 +44,7 @@ namespace PatientHealthMonitoring
             }
         }
 
-        private ObservableCollection<StepCount> stepCounts;
+        private ObservableCollection<StepCount> stepCounts = new();
         public ObservableCollection<StepCount> StepCounts
         {
             get => stepCounts;
@@ -99,23 +99,23 @@ namespace PatientHealthMonitoring
             }
         }
 
-        private PatientInfo _selectedPatient;
-        public PatientInfo SelectedPatient
+        private PatientInfo? _selectedPatient;
+        public PatientInfo? SelectedPatient
         {
             get => _selectedPatient;
             set
             {
-                if(value is not null)
+                if(value != null)
                 {
                     _selectedPatient = value;
                     OnPropertyChanged(nameof(SelectedPatient));
-                    DynamicUpdateData(SelectedPatient);
-                    SelectionChangedData(SelectedPatient);
+                    DynamicUpdateData(SelectedPatient!);
+                    SelectionChangedData(SelectedPatient!);
                 }
             }
         }
 
-        private ObservableCollection<HealthConditionInfo> healthConditionInfos;
+        private ObservableCollection<HealthConditionInfo> healthConditionInfos = new();
         public ObservableCollection<HealthConditionInfo> HealthConditionInfos
         {
             get => healthConditionInfos;
@@ -246,7 +246,7 @@ namespace PatientHealthMonitoring
             }
         }
 
-        private object axisTitle;
+        private object axisTitle = string.Empty;
         public object AxisTitle
         {
             get => axisTitle;
@@ -266,7 +266,9 @@ namespace PatientHealthMonitoring
             Minimum = 0;
             Maximum = 160;
             Interval = 40;
+
             Patients = GeneratePatientDetails();
+
             CustomPalettes = new List<Brush>
             {
                 new SolidColorBrush(Color.FromArgb(255, 136, 84, 217)),
@@ -295,7 +297,7 @@ namespace PatientHealthMonitoring
             var timer1 = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1000) };
             timer1.Tick += (s, e) =>
             {
-                DynamicUpdateData(SelectedPatient);
+                DynamicUpdateData(SelectedPatient!);
             };
             timer1.Start();
 
@@ -325,288 +327,66 @@ namespace PatientHealthMonitoring
 
         private void SelectionChangedData(PatientInfo patient)
         {
-            switch(patient.Name)
-            {            
-                case "Emily":
-                    Person2Details();
-                    break;
-                case "Grace":
-                    Person3Details();
-                    break;
-                case "Michael":
-                    Person4Details();
-                    break;
-                case "Sophia":
-                    Person5Details();
-                    break;
-                case "James":
-                    Person6Details();
-                    break;
-                case "Olivia":
-                    Person7Details();
-                    break;
-                default:
-                    Person1Details();
-                    break;
-            }
+            var patientActions = new Dictionary<string, Action>
+            {
+                { "Emily", () => SetPersonDetails(100, 108, 200, 240, 90, 120, 60, 80, 91, 94, 70, 99, 65, 35) },
+                { "Grace", () => SetPersonDetails(97, 99, 100, 200, 125, 145, 85, 100, 95, 100, 101, 115, 75, 25) },
+                { "Michael", () => SetPersonDetails(97, 99, 200, 240, 125, 145, 85, 100, 95, 100, 126, 136, 55, 45) },
+                { "Sophia", () => SetPersonDetails(97, 99, 100, 200, 125, 145, 85, 100, 95, 100, 70, 99, 40, 60) },
+                { "James", () => SetPersonDetails(100, 105, 200, 240, 90, 120, 60, 80, 81, 91, 100, 125, 75, 25) },
+                { "Olivia", () => SetPersonDetails(97, 99, 100, 200, 125, 145, 85, 100, 95, 100, 70, 99, 50, 50) }
+            };
+
+            if (patientActions.TryGetValue(patient.Name, out var action))
+                action();
+            else
+                SetPersonDetails(97, 99, 100, 200, 125, 145, 85, 100, 95, 100, 100, 125, 75, 25);
         }
 
-        private void Person1Details()
+        private void SetPersonDetails(int tempMin, int tempMax, int cholMin, int cholMax,
+                                      int sysMin, int sysMax, int diaMin, int diaMax,
+                                      int satMin, int satMax, int gluMin, int gluMax,
+                                      int medTaken, int medMissed)
         {
-            BodyTemperature = random.Next(97, 99);
-            BloodCholesterol = random.Next(100, 200);
-            BloodVitalMetrics = new ObservableCollection<BloodVitalMetrics>
+            BodyTemperature = random.Next(tempMin, tempMax);
+            BloodCholesterol = random.Next(cholMin, cholMax);
+
+            BloodVitalMetrics = new ObservableCollection<BloodVitalMetrics>();
+            string[] days = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+
+            foreach (var day in days)
             {
-                new BloodVitalMetrics("Sun", random.Next(125, 145), random.Next(85, 100), random.Next(95, 100), random.Next(100, 125)),
-                new BloodVitalMetrics("Mon", random.Next(125, 145), random.Next(85, 100), random.Next(95, 100), random.Next(100, 125)),
-                new BloodVitalMetrics("Tue", random.Next(125, 145), random.Next(85, 100), random.Next(95, 100), random.Next(100, 125)),
-                new BloodVitalMetrics("Wed", random.Next(125, 145), random.Next(85, 100), random.Next(95, 100), random.Next(100, 125)),
-                new BloodVitalMetrics("Thu", random.Next(125, 145), random.Next(85, 100), random.Next(95, 100), random.Next(100, 125)),
-                new BloodVitalMetrics("Fri", random.Next(125, 145), random.Next(85, 100), random.Next(95, 100), random.Next(100, 125)),
-                new BloodVitalMetrics("Sat", random.Next(125, 145), random.Next(85, 100), random.Next(95, 100), random.Next(100, 125))
-            };
+                BloodVitalMetrics.Add(new BloodVitalMetrics(
+                    day,
+                    random.Next(sysMin, sysMax),
+                    random.Next(diaMin, diaMax),
+                    random.Next(satMin, satMax),
+                    random.Next(gluMin, gluMax)
+                ));
+            }
+
             Medications = new ObservableCollection<MedicationAdherence>
             {
-                new MedicationAdherence(){ Name = "Taken", Value = 75 },
-                new MedicationAdherence(){ Name = "Missed", Value = 25 }
+                new MedicationAdherence { Name = "Taken", Value = medTaken },
+                new MedicationAdherence { Name = "Missed", Value = medMissed }
             };
+
             StepCounts = UpdateStepCountsData();
 
-            double mapSum = 0;
-            double saturationSum = 0;
-            double glucoseSum = 0;
+            double mapSum = 0, saturationSum = 0, glucoseSum = 0;
+
             foreach (var metric in BloodVitalMetrics)
             {
-                double map = (metric.SystolicBP + (2 * metric.DiastolicBP)) / 3;
-                saturationSum += metric.OxygenSaturation;
+                double map = (metric.SystolicBP + (2 * metric.DiastolicBP)) / 3.0;
                 mapSum += map;
+                saturationSum += metric.OxygenSaturation;
                 glucoseSum += metric.Glucoselevel;
             }
+
             averageBP = mapSum / BloodVitalMetrics.Count;
             averageSaturation = saturationSum / BloodVitalMetrics.Count;
             averageglucoseLevel = glucoseSum / BloodVitalMetrics.Count;
-            HealthConditionInfos = UpdateHealthCondition();
-        }
 
-        private void Person2Details()
-        {
-            BodyTemperature = random.Next(100, 108);
-            BloodCholesterol = random.Next(200, 240);
-            BloodVitalMetrics = new ObservableCollection<BloodVitalMetrics>
-            {
-                new BloodVitalMetrics("Sun", random.Next(90, 120), random.Next(60, 80), random.Next(91, 94), random.Next(70, 99)),
-                new BloodVitalMetrics("Mon", random.Next(90, 120), random.Next(60, 80), random.Next(91, 94), random.Next(70, 99)),
-                new BloodVitalMetrics("Tue", random.Next(90, 120), random.Next(60, 80), random.Next(91, 94), random.Next(70, 99)),
-                new BloodVitalMetrics("Wed", random.Next(90, 120), random.Next(60, 80), random.Next(91, 94), random.Next(70, 99)),
-                new BloodVitalMetrics("Thu", random.Next(90, 120), random.Next(60, 80), random.Next(91, 94), random.Next(70, 99)),
-                new BloodVitalMetrics("Fri", random.Next(90, 120), random.Next(60, 80), random.Next(91, 94), random.Next(70, 99)),
-                new BloodVitalMetrics("Sat", random.Next(90, 120), random.Next(60, 80), random.Next(91, 94), random.Next(70, 99))
-            };
-            Medications = new ObservableCollection<MedicationAdherence>
-            {
-                new MedicationAdherence(){ Name = "Taken", Value = 65 },
-                new MedicationAdherence(){ Name = "Missed", Value = 35 }
-            };
-            StepCounts = UpdateStepCountsData();
-            
-            double mapSum = 0;
-            double saturationSum = 0;
-            double glucoseSum = 0;
-            foreach (var metric in BloodVitalMetrics)
-            {
-                double map = (metric.SystolicBP + (2 * metric.DiastolicBP)) / 3;
-                saturationSum += metric.OxygenSaturation;
-                mapSum += map;
-                glucoseSum += metric.Glucoselevel;
-            }
-            averageBP = mapSum / BloodVitalMetrics.Count;
-            averageSaturation = saturationSum / BloodVitalMetrics.Count;
-            averageglucoseLevel = glucoseSum / BloodVitalMetrics.Count;
-            HealthConditionInfos = UpdateHealthCondition();
-        }
-
-        private void Person3Details()
-        {
-            BodyTemperature = random.Next(97, 99);
-            BloodCholesterol = random.Next(100, 200);
-            BloodVitalMetrics = new ObservableCollection<BloodVitalMetrics>
-            {
-                new BloodVitalMetrics("Sun", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(101, 115)),
-                new BloodVitalMetrics("Mon", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(101, 115)),
-                new BloodVitalMetrics("Tue", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(101, 115)),
-                new BloodVitalMetrics("Wed", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(101, 115)),
-                new BloodVitalMetrics("Thu", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(101, 115)),
-                new BloodVitalMetrics("Fri", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(101, 115)),
-                new BloodVitalMetrics("Sat", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(101, 115))
-            };
-            Medications = new ObservableCollection<MedicationAdherence>
-            {
-                new MedicationAdherence(){ Name = "Taken", Value = 75 },
-                new MedicationAdherence(){ Name = "Missed", Value = 25 }
-            };
-            StepCounts = UpdateStepCountsData();
-            
-            double mapSum = 0;
-            double saturationSum = 0;
-            double glucoseSum = 0;
-            foreach (var metric in BloodVitalMetrics)
-            {
-                double map = (metric.SystolicBP + (2 * metric.DiastolicBP)) / 3;
-                saturationSum += metric.OxygenSaturation;
-                mapSum += map;
-                glucoseSum += metric.Glucoselevel;
-            }
-            averageBP = mapSum / BloodVitalMetrics.Count;
-            averageSaturation = saturationSum / BloodVitalMetrics.Count;
-            averageglucoseLevel = glucoseSum / BloodVitalMetrics.Count;
-            HealthConditionInfos = UpdateHealthCondition();
-        }
-
-        private void Person4Details()
-        {
-            BodyTemperature = random.Next(97, 99);
-            BloodCholesterol = random.Next(200, 240);
-            BloodVitalMetrics = new ObservableCollection<BloodVitalMetrics>
-            {
-                new BloodVitalMetrics("Sun", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(126, 136)),
-                new BloodVitalMetrics("Mon", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(126, 136)),
-                new BloodVitalMetrics("Tue", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(126, 136)),
-                new BloodVitalMetrics("Wed", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(126, 136)),
-                new BloodVitalMetrics("Thu", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(126, 136)),
-                new BloodVitalMetrics("Fri", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(126, 136)),
-                new BloodVitalMetrics("Sat", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(126, 136))
-            };
-            Medications = new ObservableCollection<MedicationAdherence>
-            {
-                new MedicationAdherence(){ Name = "Taken", Value = 55 },
-                new MedicationAdherence(){ Name = "Missed", Value = 45 }
-            };
-            StepCounts = UpdateStepCountsData();
-            
-            double mapSum = 0;
-            double saturationSum = 0;
-            double glucoseSum = 0;
-            foreach (var metric in BloodVitalMetrics)
-            {
-                double map = (metric.SystolicBP + (2 * metric.DiastolicBP)) / 3;
-                saturationSum += metric.OxygenSaturation;
-                mapSum += map;
-                glucoseSum += metric.Glucoselevel;
-            }
-            averageBP = mapSum / BloodVitalMetrics.Count;
-            averageSaturation = saturationSum / BloodVitalMetrics.Count;
-            averageglucoseLevel = glucoseSum / BloodVitalMetrics.Count;
-            HealthConditionInfos = UpdateHealthCondition();
-        }
-
-        private void Person5Details()
-        {
-            BodyTemperature = random.Next(97, 99);
-            BloodCholesterol = random.Next(100, 200);
-            BloodVitalMetrics = new ObservableCollection<BloodVitalMetrics>
-            {
-                new BloodVitalMetrics("Sun", random.Next(125, 145), random.Next(85, 100), random.Next(95, 100), random.Next(70, 99)),
-                new BloodVitalMetrics("Mon", random.Next(125, 145), random.Next(85, 100), random.Next(95, 100), random.Next(70, 99)),
-                new BloodVitalMetrics("Tue", random.Next(125, 145), random.Next(85, 100), random.Next(95, 100), random.Next(70, 99)),
-                new BloodVitalMetrics("Wed", random.Next(125, 145), random.Next(85, 100), random.Next(95, 100), random.Next(70, 99)),
-                new BloodVitalMetrics("Thu", random.Next(125, 145), random.Next(85, 100), random.Next(95, 100), random.Next(70, 99)),
-                new BloodVitalMetrics("Fri", random.Next(125, 145), random.Next(85, 100), random.Next(95, 100), random.Next(70, 99)),
-                new BloodVitalMetrics("Sat", random.Next(125, 145), random.Next(85, 100), random.Next(95, 100), random.Next(70, 99))
-            };
-            Medications = new ObservableCollection<MedicationAdherence>
-            {
-                new MedicationAdherence(){ Name = "Taken", Value = 75 },
-                new MedicationAdherence(){ Name = "Missed", Value = 25 }
-            };
-            StepCounts = UpdateStepCountsData();
-            
-            double mapSum = 0;
-            double saturationSum = 0;
-            double glucoseSum = 0;
-            foreach (var metric in BloodVitalMetrics)
-            {
-                double map = (metric.SystolicBP + (2 * metric.DiastolicBP)) / 3;
-                saturationSum += metric.OxygenSaturation;
-                mapSum += map;
-                glucoseSum += metric.Glucoselevel;
-            }
-            averageBP = mapSum / BloodVitalMetrics.Count;
-            averageSaturation = saturationSum / BloodVitalMetrics.Count;
-            averageglucoseLevel = glucoseSum / BloodVitalMetrics.Count;
-            HealthConditionInfos =  UpdateHealthCondition();
-        }
-
-        private void Person6Details()
-        {
-            BodyTemperature = random.Next(100, 105);
-            BloodCholesterol = random.Next(200, 240);
-            BloodVitalMetrics = new ObservableCollection<BloodVitalMetrics>
-            {
-                new BloodVitalMetrics("Sun", random.Next(90, 120), random.Next(60, 80), random.Next(81, 91), random.Next(100, 125)),
-                new BloodVitalMetrics("Mon", random.Next(90, 120), random.Next(60, 80), random.Next(81, 91), random.Next(100, 125)),
-                new BloodVitalMetrics("Tue", random.Next(90, 120), random.Next(60, 80), random.Next(81, 91), random.Next(100, 125)),
-                new BloodVitalMetrics("Wed", random.Next(90, 120), random.Next(60, 80), random.Next(81, 91), random.Next(100, 125)),
-                new BloodVitalMetrics("Thu", random.Next(90, 120), random.Next(60, 80), random.Next(81, 91), random.Next(100, 125)),
-                new BloodVitalMetrics("Fri", random.Next(90, 120), random.Next(60, 80), random.Next(81, 91), random.Next(100, 125)),
-                new BloodVitalMetrics("Sat", random.Next(90, 120), random.Next(60, 80), random.Next(81, 91), random.Next(100, 125))
-            };
-            Medications = new ObservableCollection<MedicationAdherence>
-            {
-                new MedicationAdherence(){ Name = "Taken", Value = 75 },
-                new MedicationAdherence(){ Name = "Missed", Value = 25 }
-            };
-            StepCounts = UpdateStepCountsData();
-
-            double mapSum = 0;
-            double saturationSum = 0;
-            double glucoseSum = 0;
-            foreach (var metric in BloodVitalMetrics)
-            {
-                double map = (metric.SystolicBP + (2 * metric.DiastolicBP)) / 3;
-                saturationSum += metric.OxygenSaturation;
-                mapSum += map;
-                glucoseSum += metric.Glucoselevel;
-            }
-            averageBP = mapSum / BloodVitalMetrics.Count;
-            averageSaturation = saturationSum / BloodVitalMetrics.Count;
-            averageglucoseLevel = glucoseSum / BloodVitalMetrics.Count;
-            HealthConditionInfos = UpdateHealthCondition();
-        }
-
-        private void Person7Details()
-        {
-            BodyTemperature = random.Next(97, 99);
-            BloodCholesterol = random.Next(100, 200);
-            BloodVitalMetrics = new ObservableCollection<BloodVitalMetrics>
-            {
-                new BloodVitalMetrics("Sun", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(70, 99)),
-                new BloodVitalMetrics("Mon", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(70, 99)),
-                new BloodVitalMetrics("Tue", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(70, 99)),
-                new BloodVitalMetrics("Wed", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(70, 99)),
-                new BloodVitalMetrics("Thu", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(70, 99)),
-                new BloodVitalMetrics("Fri", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(70, 99)),
-                new BloodVitalMetrics("Sat", random.Next(125, 150), random.Next(85, 100), random.Next(95, 100), random.Next(70, 99))
-            };
-            Medications = new ObservableCollection<MedicationAdherence>
-            {
-                new MedicationAdherence(){ Name = "Taken", Value = 75 },
-                new MedicationAdherence(){ Name = "Missed", Value = 25 }
-            };
-            StepCounts = UpdateStepCountsData();
-            
-            double mapSum = 0;
-            double saturationSum = 0;
-            double glucoseSum = 0;
-            foreach (var metric in BloodVitalMetrics)
-            {
-                double map = (metric.SystolicBP + (2 * metric.DiastolicBP)) / 3;
-                saturationSum += metric.OxygenSaturation;
-                mapSum += map;
-                glucoseSum += metric.Glucoselevel;
-            }
-            averageBP = mapSum / BloodVitalMetrics.Count;
-            averageSaturation = saturationSum / BloodVitalMetrics.Count;
-            averageglucoseLevel = glucoseSum / BloodVitalMetrics.Count;
             HealthConditionInfos = UpdateHealthCondition();
         }
 
@@ -654,37 +434,23 @@ namespace PatientHealthMonitoring
 
         private void DynamicUpdateData(PatientInfo patient)
         {
-            switch (patient.Name)
+            var ranges = new Dictionary<string, (int heartMin, int heartMax, int respMin, int respMax)>
             {
-                case "Emily":
-                    HeartRate = random.Next(49, 59);
-                    RespiratoryRate = random.Next(12, 20);
-                    break;
-                case "Grace":
-                    HeartRate = random.Next(60, 100);
-                    RespiratoryRate = random.Next(9, 11);
-                    break;
-                case "Michael":
-                    HeartRate = random.Next(101, 110);
-                    RespiratoryRate = random.Next(12, 20);
-                    break;
-                case "Sophia":
-                    HeartRate = random.Next(60, 100);
-                    RespiratoryRate = random.Next(12, 20);
-                    break;
-                case "James":
-                    HeartRate = random.Next(49, 59);
-                    RespiratoryRate = random.Next(9, 11);
-                    break;
-                case "Olivia":
-                    HeartRate = random.Next(101, 110);
-                    RespiratoryRate = random.Next(21, 25);
-                    break;
-                default:
-                    HeartRate = random.Next(60, 100);
-                    RespiratoryRate = random.Next(12, 20);
-                    break;
-            }
+                { "Emily", (49, 59, 12, 20) },
+                { "Grace", (60, 100, 9, 11) },
+                { "Michael", (101, 110, 12, 20) },
+                { "Sophia", (60, 100, 12, 20) },
+                { "James", (49, 59, 9, 11) },
+                { "Olivia", (101, 110, 21, 25) }
+            };
+
+            var (heartMin, heartMax, respMin, respMax) =
+                ranges.TryGetValue(patient.Name, out var range)
+                ? range
+                : (60, 100, 12, 20);
+
+            HeartRate = random.Next(heartMin, heartMax);
+            RespiratoryRate = random.Next(respMin, respMax);
         }
     }
 }
